@@ -7,7 +7,9 @@ time.  It is easily swappable with a test method without having to monkeypatch
 the standard datetime classes.
 
     >>> import zc.time
+
     >>> now = zc.time.now()
+
     >>> type(now)
     <type 'datetime.datetime'>
 
@@ -15,3 +17,102 @@ It also defaults to UTC, which the vanilla datetime does not.
 
     >>> now.tzinfo
     <UTC>
+
+There's also a ``utcnow()`` function, which returns the naive UTC time
+corresponding to the ``now()`` function's return value.  This provides a
+utcnow() implementation that's similarly affected by replacing the
+``now()`` function:
+
+    >>> now = zc.time.utcnow()
+
+    >>> type(now)
+    <type 'datetime.datetime'>
+
+    >>> now.tzinfo
+
+This relationship holds even if ``now()`` is replaced:
+
+    >>> import datetime
+    >>> import pytz
+
+    >>> t = datetime.datetime(2010, 4, 1, 10, 50, 30, 2345, pytz.UTC)
+    >>> old_now = zc.time.now
+
+    >>> zc.time.now = lambda: t
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 10, 50, 30, 2345, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 10, 50, 30, 2345)
+
+The ``reset()`` function provided cleans up modifications made to
+control the time:
+
+    >>> zc.time.reset()
+    >>> zc.time.now is old_now
+    True
+
+A ``set_now()`` function is provided that takes a datetime, and causes
+``now()`` and ``utcnow()`` to pretend that's the real time.  The time
+passed in can be in any time zone; naive times are converted to UTC
+using ``pytz``:
+
+    >>> zc.time.set_now(t)
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 10, 50, 30, 2345, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 10, 50, 30, 2345)
+
+    >>> naive = datetime.datetime(2010, 4, 1, 12, 27, 3, 5432)
+
+    >>> zc.time.set_now(naive)
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 12, 27, 3, 5432, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 12, 27, 3, 5432)
+
+    >>> t = datetime.datetime(2010, 4, 1, 11, 17, 3, 5432,
+    ...                       pytz.timezone("US/Eastern"))
+
+    >>> zc.time.set_now(t)
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 16, 17, 3, 5432, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 16, 17, 3, 5432)
+
+To move forward in time, simply use ``set_now()`` again:
+
+    >>> zc.time.set_now(t + datetime.timedelta(hours=1))
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 17, 17, 3, 5432, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 17, 17, 3, 5432)
+
+The ``reset()`` function is used to clean up after this as well:
+
+    >>> zc.time.reset()
+
+The ``reset()`` is registered as a general cleanup handler if
+``zope.testing`` is available.  This is generally not sufficient for
+functional tests.
+
+
+Changes
+=======
+
+
+0.2 (2010-04-01)
+----------------
+
+- Added utcnow().
+- Added set_now(), reset().
+
+
+0.1
+---
+
+Initial release.
