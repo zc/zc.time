@@ -92,6 +92,20 @@ To move forward in time, simply use ``set_now()`` again:
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 17, 17, 3, 5432)
 
+If an application sleeps using ``time.sleep``, that'll be reflected in
+the times reported:
+
+    >>> import time
+
+    >>> time.sleep(0.25)
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 17, 17, 3, 255432, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 17, 17, 3, 255432)
+
+The reported time will be updated by the exact delay requested of the
+``time.sleep`` call, rather than by the actual delay.
+
 The ``reset()`` function is used to clean up after this as well:
 
     >>> zc.time.reset()
@@ -103,6 +117,12 @@ functional tests.
 
 Changes
 =======
+
+
+0.3 (2010-07-23)
+----------------
+
+- Added time.sleep() support.
 
 
 0.2 (2010-04-01)
