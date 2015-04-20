@@ -130,6 +130,9 @@ Changes
 =======
 
 
+1.0.0 (2015-04-20)
+------------------
+
 - Include ``time.time`` in what's controlled by ``zc.time.set_now``.
 
 
