@@ -26,6 +26,7 @@ def set_now(t):
     elif tz is not pytz.UTC:
         t = t.astimezone(pytz.UTC)
     time.sleep = _sleep
+    time.time = _time
     _t = t
 
 
@@ -34,6 +35,7 @@ def reset():
     now = _now
     _t = None
     time.sleep = _time_sleep
+    time.time = _time_time
 
 
 def _sleep(seconds):
@@ -47,7 +49,18 @@ def _sleep(seconds):
         _time_sleep(seconds)
         _t += td
 
+
+def _time():
+    if _t is None:
+        # We shouldn't be involved; get out of the way:
+        time.time = _time_time
+        return _time_time()
+    else:
+        return time.mktime(_t.timetuple()) + (_t.microsecond / 1000000.0)
+    
+
 _time_sleep = time.sleep
+_time_time = time.time
 
 
 # Play the conditional import game to avoid a required dependency.

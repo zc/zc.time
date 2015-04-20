@@ -6,6 +6,7 @@ zc.time provides a single point of creating datetime objects with the current
 time.  It is easily swappable with a test method without having to monkeypatch
 the standard datetime classes.
 
+    >>> import time
     >>> import zc.time
 
     >>> now = zc.time.now()
@@ -30,7 +31,7 @@ utcnow() implementation that's similarly affected by replacing the
 
     >>> now.tzinfo
 
-This relationship holds even if ``now()`` is replaced:
+This relationship holds even if ``now()`` is replaced (not recommended):
 
     >>> import datetime
     >>> import pytz
@@ -55,7 +56,7 @@ control the time:
 A ``set_now()`` function is provided that takes a datetime, and causes
 ``now()`` and ``utcnow()`` to pretend that's the real time.  The time
 passed in can be in any time zone; naive times are converted to UTC
-using ``pytz``:
+using ``pytz.UTC.localize``:
 
     >>> zc.time.set_now(t)
 
@@ -63,6 +64,8 @@ using ``pytz``:
     datetime.datetime(2010, 4, 1, 10, 50, 30, 2345, tzinfo=<UTC>)
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 10, 50, 30, 2345)
+    >>> time.time()
+    1270137030.002345
 
     >>> naive = datetime.datetime(2010, 4, 1, 12, 27, 3, 5432)
 
@@ -72,6 +75,8 @@ using ``pytz``:
     datetime.datetime(2010, 4, 1, 12, 27, 3, 5432, tzinfo=<UTC>)
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 12, 27, 3, 5432)
+    >>> time.time()
+    1270142823.005432
 
     >>> t = datetime.datetime(2010, 4, 1, 11, 17, 3, 5432,
     ...                       pytz.timezone("US/Eastern"))
@@ -82,6 +87,8 @@ using ``pytz``:
     datetime.datetime(2010, 4, 1, 16, 17, 3, 5432, tzinfo=<UTC>)
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 16, 17, 3, 5432)
+    >>> time.time()
+    1270156623.005432
 
 To move forward in time, simply use ``set_now()`` again:
 
@@ -91,6 +98,8 @@ To move forward in time, simply use ``set_now()`` again:
     datetime.datetime(2010, 4, 1, 17, 17, 3, 5432, tzinfo=<UTC>)
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 17, 17, 3, 5432)
+    >>> time.time()
+    1270160223.005432
 
 If an application sleeps using ``time.sleep``, that'll be reflected in
 the times reported:
@@ -102,6 +111,8 @@ the times reported:
     datetime.datetime(2010, 4, 1, 17, 17, 3, 255432, tzinfo=<UTC>)
     >>> zc.time.utcnow()
     datetime.datetime(2010, 4, 1, 17, 17, 3, 255432)
+    >>> time.time()
+    1270160223.255432
 
 The reported time will be updated by the exact delay requested of the
 ``time.sleep`` call, rather than by the actual delay.
@@ -112,11 +123,14 @@ The ``reset()`` function is used to clean up after this as well:
 
 The ``reset()`` is registered as a general cleanup handler if
 ``zope.testing`` is available.  This is generally not sufficient for
-functional tests.
+functional tests, which will need to call ``reset`` themselves.
 
 
 Changes
 =======
+
+
+- Include ``time.time`` in what's controlled by ``zc.time.set_now``.
 
 
 0.3 (2010-07-23)
