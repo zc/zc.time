@@ -4,7 +4,7 @@ setup(
     name="zc.time",
     description="Hook time for testing",
     long_description=open("src/zc/time/README.txt").read(),
-    version="0",
+    version="1.0.1",
     license="ZPL 2.1",
     packages=find_packages('src'),
     include_package_data=True,
