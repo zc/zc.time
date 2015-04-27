@@ -78,10 +78,21 @@ using ``pytz.UTC.localize``:
     >>> time.time()
     1270142823.005432
 
-    >>> t = datetime.datetime(2010, 4, 1, 11, 17, 3, 5432,
-    ...                       pytz.timezone("US/Eastern"))
+    >>> eastern = pytz.timezone("US/Eastern")
+    >>> t = eastern.localize(datetime.datetime(2010, 4, 1, 11, 17, 3, 5432))
 
     >>> zc.time.set_now(t)
+
+    >>> zc.time.now()
+    datetime.datetime(2010, 4, 1, 15, 17, 3, 5432, tzinfo=<UTC>)
+    >>> zc.time.utcnow()
+    datetime.datetime(2010, 4, 1, 15, 17, 3, 5432)
+    >>> time.time()
+    1270153023.005432
+
+To move forward in time, simply use ``set_now()`` again:
+
+    >>> zc.time.set_now(t + datetime.timedelta(hours=1))
 
     >>> zc.time.now()
     datetime.datetime(2010, 4, 1, 16, 17, 3, 5432, tzinfo=<UTC>)
@@ -90,17 +101,6 @@ using ``pytz.UTC.localize``:
     >>> time.time()
     1270156623.005432
 
-To move forward in time, simply use ``set_now()`` again:
-
-    >>> zc.time.set_now(t + datetime.timedelta(hours=1))
-
-    >>> zc.time.now()
-    datetime.datetime(2010, 4, 1, 17, 17, 3, 5432, tzinfo=<UTC>)
-    >>> zc.time.utcnow()
-    datetime.datetime(2010, 4, 1, 17, 17, 3, 5432)
-    >>> time.time()
-    1270160223.005432
-
 If an application sleeps using ``time.sleep``, that'll be reflected in
 the times reported:
 
@@ -108,11 +108,11 @@ the times reported:
 
     >>> time.sleep(0.25)
     >>> zc.time.now()
-    datetime.datetime(2010, 4, 1, 17, 17, 3, 255432, tzinfo=<UTC>)
+    datetime.datetime(2010, 4, 1, 16, 17, 3, 255432, tzinfo=<UTC>)
     >>> zc.time.utcnow()
-    datetime.datetime(2010, 4, 1, 17, 17, 3, 255432)
+    datetime.datetime(2010, 4, 1, 16, 17, 3, 255432)
     >>> time.time()
-    1270160223.255432
+    1270156623.255432
 
 The reported time will be updated by the exact delay requested of the
 ``time.sleep`` call, rather than by the actual delay.
